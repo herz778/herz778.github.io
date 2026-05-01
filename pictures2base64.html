@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片 ⇄ Base64 互转工具 · 保存/复制</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f2f9 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,20,40,0.2), 0 6px 12px rgba(0,0,0,0.1);
+            padding: 32px 28px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h1 span {
+            background: #1e4e6f;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 400;
+            padding: 4px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+        }
+        .sub {
+            color: #2c5779;
+            margin-bottom: 32px;
+            font-size: 1rem;
+            border-left: 4px solid #2b95c6;
+            padding-left: 18px;
+            background: rgba(43, 149, 198, 0.06);
+            border-radius: 0 20px 20px 0;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+        @media (max-width: 720px) {
+            .grid-2 { grid-template-columns: 1fr; gap: 36px; }
+        }
+        .panel {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 12px 24px -8px rgba(0,40,70,0.15);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        .panel h2 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 1.4rem;
+            color: #113a52;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #bcd6e8;
+            padding-bottom: 12px;
+        }
+        .panel h2 .badge {
+            background: #22749e;
+            color: white;
+            font-size: 0.8rem;
+            border-radius: 24px;
+            padding: 2px 12px;
+            margin-left: 8px;
+        }
+        .upload-area {
+            border: 2px dashed #98c1da;
+            border-radius: 24px;
+            padding: 30px 16px;
+            text-align: center;
+            background: #f3faff;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #1e6e96;
+            background: #e1f0fe;
+        }
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 6px;
+        }
+        .file-info {
+            margin: 12px 0 6px;
+            font-size: 0.9rem;
+            color: #1a4a6b;
+            background: #deedf6;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+        .preview-box {
+            margin: 22px 0 20px;
+            text-align: center;
+            background: #f9f9f9;
+            border-radius: 24px;
+            padding: 20px;
+        }
+        .preview-box img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            background: #fff url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiIHZpZXdCb3g9IjAgMCA4IDgiPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmMGYwZjAiLz48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZTBlMGUwIi8+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjQiIGhlaWdodD0iNCIgZmlsbD0iI2UwZTBlMCIvPjwvc3ZnPg=='); /* 透明网格 */
+            background-size: 20px 20px;
+        }
+        textarea {
+            width: 100%;
+            border: 1px solid #bfd9ec;
+            border-radius: 20px;
+            padding: 16px 18px;
+            font-family: 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+            background: #f5faff;
+            margin: 12px 0 16px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+        }
+        textarea:focus {
+            outline: 2px solid #2b95c6;
+            background: white;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+            align-items: center;
+        }
+        .btn {
+            background: white;
+            border: 1px solid #bed9ef;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 550;
+            font-size: 0.95rem;
+            color: #1c4f72;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(0,30,50,0.05);
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: #1b6c96;
+            border-color: #0a3f5a;
+            color: white;
+            box-shadow: 0 8px 14px -6px #1b6c9660;
+        }
+        .btn-primary:hover {
+            background: #0f4f71;
+        }
+        .btn:hover {
+            background: #e3f0fa;
+            border-color: #7fb3d4;
+        }
+        .btn-primary:hover {
+            background: #125077;
+            border-color: #083042;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .flash-message {
+            background: #e6f3d8;
+            color: #1f6533;
+            padding: 10px 18px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #9fcc9f;
+            margin-top: 16px;
+            animation: fadeIn 0.2s;
+        }
+        .flash-message.error {
+            background: #ffe3de;
+            color: #a13b2c;
+            border-color: #f0aca3;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .footer-note {
+            margin-top: 28px;
+            font-size: 0.85rem;
+            color: #2e577a;
+            background: #dbeaf3;
+            padding: 12px 24px;
+            border-radius: 60px;
+            text-align: center;
+        }
+        .file-name {
+            font-weight: 600;
+            color: #0f3d57;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>
+        🖼️ Image ↔ Base64 互转器
+        <span>保存图片 · 复制编码</span>
+    </h1>
+    <div class="sub">▼ 将图片拖拽或粘贴 → 获得Base64；或将Base64粘贴 → 还原图片并保存</div>
+
+    <div class="grid-2">
+        <!-- 左侧：图片 → Base64 -->
+        <div class="panel">
+            <h2>
+                📤 图片 转 Base64
+                <span class="badge">JPG / PNG / GIF / WebP ...</span>
+            </h2>
+
+            <!-- 隐藏file input -->
+            <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/gif, image/webp, image/bmp, image/svg+xml" style="display: none;">
+
+            <div class="upload-area" id="dropArea">
+                <div class="upload-icon">📁⬇️</div>
+                <div><strong>点击选择图片</strong> 或 拖放文件到这里</div>
+                <div style="font-size:0.8rem; margin-top:8px; color:#346f92;">支持 jpg, png, gif, webp, bmp, svg</div>
+            </div>
+
+            <div id="fileInfo" class="file-info" style="display: none;"></div>
+
+            <div class="preview-box" id="imagePreviewBox" style="display: none;">
+                <img id="previewImage" src="#" alt="预览图">
+            </div>
+
+            <textarea id="base64Output" rows="5" placeholder="等待转换后的Base64会显示在这里 …" readonly></textarea>
+
+            <div class="btn-group">
+                <button class="btn" id="copyBase64Btn">📋 复制Base64</button>
+                <button class="btn" id="clearBtn">🗑️ 清空</button>
+            </div>
+            <div id="leftMessage" class="flash-message" style="display: none;"></div>
+        </div>
+
+        <!-- 右侧：Base64 → 图片 -->
+        <div class="panel">
+            <h2>
+                📥 Base64 转 图片
+                <span class="badge">粘贴编码 还原图像</span>
+            </h2>
+
+            <textarea id="base64Input" rows="5" placeholder="粘贴 Base64 字符串 (data:image/... 或 纯base64)..."></textarea>
+
+            <div class="btn-group">
+                <button class="btn" id="renderImageBtn">🔄 渲染图片</button>
+                <button class="btn" id="saveImageBtn" disabled>💾 保存图片</button>
+                <button class="btn" id="clearRightBtn">🗑️ 清空</button>
+            </div>
+
+            <div class="preview-box" id="decodedPreviewBox" style="display: none; margin-top: 20px;">
+                <img id="decodedImage" src="#" alt="解码后的图片">
+            </div>
+            <div id="rightMessage" class="flash-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        ⚡ 工具在本地运行，不上传任何数据。点击复制，或右键保存图片。Base64可包含 data:image 头或纯体。
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM 元素
+        const fileInput = document.getElementById('fileInput');
+        const dropArea = document.getElementById('dropArea');
+        const fileInfo = document.getElementById('fileInfo');
+        const previewBox = document.getElementById('imagePreviewBox');
+        const previewImage = document.getElementById('previewImage');
+        const base64Output = document.getElementById('base64Output');
+        const copyBase64Btn = document.getElementById('copyBase64Btn');
+        const clearBtn = document.getElementById('clearBtn');
+        const leftMessage = document.getElementById('leftMessage');
+
+        const base64Input = document.getElementById('base64Input');
+        const renderImageBtn = document.getElementById('renderImageBtn');
+        const saveImageBtn = document.getElementById('saveImageBtn');
+        const clearRightBtn = document.getElementById('clearRightBtn');
+        const decodedPreviewBox = document.getElementById('decodedPreviewBox');
+        const decodedImage = document.getElementById('decodedImage');
+        const rightMessage = document.getElementById('rightMessage');
+
+        let currentDecodedImageURL = null;          // 用于保存右侧生成的blob url
+        let currentDecodedMimeType = 'image/png';   // 推测的mime
+
+        // ---------- 辅助函数：显示短暂提示 ----------
+        function showLeftMessage(text, isError = false) {
+            leftMessage.style.display = 'flex';
+            leftMessage.textContent = text;
+            leftMessage.className = 'flash-message' + (isError ? ' error' : '');
+            setTimeout(() => {
+                leftMessage.style.display = 'none';
+            }, 2800);
+        }
+
+        function showRightMessage(text, isError = false) {
+            rightMessage.style.display = 'flex';
+            rightMessage.textContent = text;
+            rightMessage.className = 'flash-message' + (isError ? ' error' : '');
+            setTimeout(() => {
+                rightMessage.style.display = 'none';
+            }, 2800);
+        }
+
+        // 清理左侧预览/输出
+        function resetLeftPanel() {
+            previewBox.style.display = 'none';
+            previewImage.src = '#';
+            fileInfo.style.display = 'none';
+            fileInfo.textContent = '';
+            base64Output.value = '';
+        }
+
+        // 清理右侧预览 (但不清空textarea)
+        function resetRightPreview() {
+            if (currentDecodedImageURL) {
+                URL.revokeObjectURL(currentDecodedImageURL);
+                currentDecodedImageURL = null;
+            }
+            decodedPreviewBox.style.display = 'none';
+            decodedImage.src = '#';
+            saveImageBtn.disabled = true;
+        }
+
+        // ---------- 左侧：文件选择 & 拖拽 ----------
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        // 拖拽事件
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = '#1e6e96';
+            dropArea.style.background = '#d7ebf7';
+        });
+        dropArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = '#98c1da';
+            dropArea.style.background = '#f3faff';
+        });
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = '#98c1da';
+            dropArea.style.background = '#f3faff';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files.length > 0) {
+                handleImageFile(fileInput.files[0]);
+            }
+        });
+
+        function handleImageFile(file) {
+            // 重置左侧预览
+            resetLeftPanel();
+
+            if (!file.type.startsWith('image/')) {
+                showLeftMessage('❌ 请选择一个图片文件 (jpg/png等)', true);
+                return;
+            }
+
+            // 显示文件信息
+            fileInfo.style.display = 'inline-block';
+            fileInfo.textContent = `📄 ${file.name}  (${(file.size / 1024).toFixed(2)} KB)`;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64String = e.target.result;   // 包含 data:image 头的完整base64
+                base64Output.value = base64String;
+
+                // 预览
+                previewImage.src = base64String;
+                previewBox.style.display = 'block';
+
+                showLeftMessage('✅ 转换成功！');
+            };
+            reader.onerror = () => {
+                showLeftMessage('❌ 文件读取失败', true);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 复制Base64
+        copyBase64Btn.addEventListener('click', () => {
+            if (!base64Output.value.trim()) {
+                showLeftMessage('⚠️ 没有可复制的Base64', true);
+                return;
+            }
+            navigator.clipboard.writeText(base64Output.value).then(() => {
+                showLeftMessage('📋 已复制到剪贴板！');
+            }).catch(() => {
+                // 降级方案
+                base64Output.select();
+                document.execCommand('copy');
+                showLeftMessage('📋 已复制 (兼容方式)');
+            });
+        });
+
+        // 左侧清空
+        clearBtn.addEventListener('click', () => {
+            resetLeftPanel();
+            fileInput.value = '';   // 清空文件选择
+            showLeftMessage('🗑️ 已清空');
+        });
+
+        // ---------- 右侧：Base64 转 图片 ----------
+        function extractBase64Data(base64Str) {
+            // 去除可能的换行/空格
+            let str = base64Str.trim();
+            // 匹配 data:image/任意格式;base64, 后面跟base64
+            const dataUriPattern = /^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/;
+            const match = str.match(dataUriPattern);
+            if (match) {
+                return {
+                    mime: match[1],            // png, jpeg ...
+                    base64Body: match[2].replace(/\s/g, '')  // 移除内部空白
+                };
+            } else {
+                // 认为是纯base64 (不带header) , 尝试嗅探mime
+                const cleaned = str.replace(/\s/g, '');
+                return {
+                    mime: null,          // 未知，后面尝试解析
+                    base64Body: cleaned
+                };
+            }
+        }
+
+        function base64ToBlob(base64Body, mimeHint = 'image/png') {
+            try {
+                const binary = atob(base64Body);
+                const len = binary.length;
+                const buffer = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    buffer[i] = binary.charCodeAt(i);
+                }
+                // 如果有mimeHint就用，没有默认 png
+                return new Blob([buffer], { type: mimeHint || 'image/png' });
+            } catch (e) {
+                throw new Error('无效的Base64编码');
+            }
+        }
+
+        renderImageBtn.addEventListener('click', () => {
+            const rawInput = base64Input.value.trim();
+            if (!rawInput) {
+                showRightMessage('⚠️ 请输入Base64字符串', true);
+                return;
+            }
+
+            // 重置右侧预览
+            resetRightPreview();
+
+            try {
+                const { mime, base64Body } = extractBase64Data(rawInput);
+                if (!base64Body || base64Body.length === 0) {
+                    throw new Error('未提取到有效的Base64数据');
+                }
+
+                // 尝试猜测更精确的mime (若没有从data header获取)
+                let detectedMime = mime ? `image/${mime}` : null;
+                if (!detectedMime) {
+                    // 简单通过第一个字节猜测？不如让浏览器自己识别，先使用通用image/png
+                    // 但为了准确，可以先试用image/png，如果加载出错再提示
+                    detectedMime = 'image/png';   // 默认
+                }
+
+                // 生成blob
+                const blob = base64ToBlob(base64Body, detectedMime);
+                // 更新存储的mime (提取实际blob类型)
+                currentDecodedMimeType = blob.type || 'image/png';
+
+                // 创建对象URL
+                const blobUrl = URL.createObjectURL(blob);
+                currentDecodedImageURL = blobUrl;
+
+                // 显示图片
+                decodedImage.onload = () => {
+                    decodedPreviewBox.style.display = 'block';
+                    saveImageBtn.disabled = false;
+                    showRightMessage('✅ 图片渲染成功，可以保存');
+                };
+                decodedImage.onerror = (err) => {
+                    // 加载失败
+                    URL.revokeObjectURL(blobUrl);
+                    currentDecodedImageURL = null;
+                    decodedPreviewBox.style.display = 'none';
+                    saveImageBtn.disabled = true;
+                    showRightMessage('❌ 无法解析为图片，请检查Base64格式或MIME类型', true);
+                };
+                decodedImage.src = blobUrl;
+
+            } catch (error) {
+                showRightMessage('❌ 转换失败: ' + error.message, true);
+                resetRightPreview();
+            }
+        });
+
+        // 保存图片
+        saveImageBtn.addEventListener('click', () => {
+            if (!currentDecodedImageURL) {
+                showRightMessage('没有可保存的图片', true);
+                return;
+            }
+
+            // 生成文件名 (使用时间戳 + 正确的后缀)
+            const mime = currentDecodedMimeType; // 例如 'image/png'
+            let ext = 'png';
+            if (mime.includes('jpeg') || mime.includes('jpg')) ext = 'jpg';
+            else if (mime.includes('gif')) ext = 'gif';
+            else if (mime.includes('webp')) ext = 'webp';
+            else if (mime.includes('bmp')) ext = 'bmp';
+            else if (mime.includes('svg')) ext = 'svg';
+
+            const fileName = `base64_image_${Date.now()}.${ext}`;
+
+            // 通过a标签下载 (利用blob url)
+            const a = document.createElement('a');
+            a.href = currentDecodedImageURL;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            showRightMessage(`💾 保存为: ${fileName}`);
+        });
+
+        // 清空右侧
+        clearRightBtn.addEventListener('click', () => {
+            base64Input.value = '';
+            resetRightPreview();
+            showRightMessage('右侧已清空');
+        });
+
+        // 额外：如果用户直接粘贴包含 data URI 的文本，可以自动触发渲染吗？(不自动，需要单击按钮，符合预期)
+
+        // 处理可能左侧预览时同时右侧干扰，不需要
+
+        // 为了防止内存泄露，在页面卸载前释放blob url（但不是必须）
+        window.addEventListener('beforeunload', () => {
+            if (currentDecodedImageURL) URL.revokeObjectURL(currentDecodedImageURL);
+        });
+
+        // 为方便，左侧预览图片若是大图也释放？仅有一张预览，无需。
+    })();
+</script>
+</body>
+</html>
