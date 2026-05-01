@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herz的生日倒计时</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .countdown {
+            font-size: 3.2rem;
+            font-weight: 400;
+            color: #e74c3c;
+            margin: 20px 0;
+            line-height: 1.3;
+        }
+        
+        .milliseconds {
+            font-size: 2.2rem;
+            font-weight: 400;
+            display: inline-block;
+            min-width: 80px;
+            text-align: left;
+        }
+        
+        .birthday-info {
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        .year-badge {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .countdown {
+                font-size: 2.2rem;
+            }
+            
+            .milliseconds {
+                font-size: 1.6rem;
+                min-width: 60px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .countdown {
+                font-size: 1.8rem;
+            }
+            
+            .milliseconds {
+                font-size: 1.3rem;
+                min-width: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>距离Herz的生日还有</h1>
+        <div class="countdown" id="countdown">
+            正在计算...
+        </div>
+        <div class="birthday-info">
+            下一次生日：<span id="nextBirthdayDate">2025年1月4日</span>
+        </div>
+    </div>
+
+    <script>
+        function updateCountdown() {
+            const now = new Date();
+            let currentYear = now.getFullYear();
+            
+            // 检查年份是否在有效范围内
+            if (currentYear < 2025 || currentYear > 2124) {
+                document.getElementById('countdown').innerHTML = "不在有效年份范围内";
+                return;
+            }
+            
+            // 计算下一个生日日期
+            let nextBirthday = new Date(currentYear, 0, 4); // 1月4日
+            
+            // 如果今年生日已过，计算下一年的生日
+            if (now > nextBirthday) {
+                nextBirthday = new Date(currentYear + 1, 0, 4);
+            }
+            
+            // 计算时间差
+            const diff = nextBirthday - now;
+            
+            // 计算天、小时、分钟、秒和毫秒
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            const milliseconds = Math.floor(diff % 1000);
+            
+            // 格式化毫秒为3位数
+            const formattedMilliseconds = milliseconds.toString().padStart(3, '0');
+            const formattedSeconds = seconds.toString().padStart(2, '0');
+            
+            // 更新显示
+            document.getElementById('countdown').innerHTML = 
+                `${days} 天 ${hours} 时 ${minutes} 分 <span class="seconds">${formattedSeconds}</span>.<span class="milliseconds">${formattedMilliseconds}</span>秒`;
+            
+            // 更新下一次生日日期显示
+            document.getElementById('nextBirthdayDate').textContent = 
+                `${nextBirthday.getFullYear()}年${nextBirthday.getMonth() + 1}月${nextBirthday.getDate()}日`;
+            
+        }
+        
+        // 初始更新
+        updateCountdown();
+        
+        // 使用requestAnimationFrame优化动画流畅度
+        function smoothUpdate() {
+            updateCountdown();
+            requestAnimationFrame(smoothUpdate);
+        }
+        
+        requestAnimationFrame(smoothUpdate);
+    </script>
+</body>
+</html>
