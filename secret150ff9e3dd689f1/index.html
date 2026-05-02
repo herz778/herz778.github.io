@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人导航页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f7fa;
+            gap: 20px;
+        }
+        .title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .nav-btn {
+            width: 280px;
+            padding: 16px 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            background-color: #409eff;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            background-color: #337ecc;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="title">个人快捷导航</div>
+    <button class="nav-btn" onclick="location.href='https://herz.asia/bili'">我的哔哩哔哩主页</button>
+    <button class="nav-btn" onclick="location.href='https://herz.asia/birthday'">我的生日</button>
+    <button class="nav-btn" onclick="location.href='https://herz.asia/pictures2base64'">图片Base64转换工具</button>
+    <button class="nav-btn" onclick="location.href='https://herz.asia/duo'">我的多邻国主页</button>
+</body>
+</html>
